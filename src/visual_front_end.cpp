@@ -45,7 +45,7 @@ bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time)
         Profiler::Start("0.Full-Front_End");
     cv::imshow("image used for tracking", iml);
     cv::waitKey(-1);
-    cv::destroyAllWindows()<<std::endl;
+    cv::destroyAllWindows();
     bool iskfreq = trackMono(iml, time);
 
     if( iskfreq ) {
