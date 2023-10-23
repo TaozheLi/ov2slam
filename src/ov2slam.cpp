@@ -149,7 +149,7 @@ void SlamManager::run()
             // Display info on current frame state
             if( pslamstate_->debug_ )
                 pcurframe_->displayFrameInfo();
-            std::cout<<"displayFrameInfo() successfully"<<stdLLendl;
+            std::cout<<"displayFrameInfo() successfully"<<std::endl;
             // 1. Send images to the FrontEnd
             // =============================================
             if( pslamstate_->debug_ )
