@@ -241,6 +241,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     if( pbrief_ == nullptr ) {
         #ifdef OPENCV_CONTRIB
         pbrief_ = cv::xfeatures2d::BriefDescriptorExtractor::create();
+        std::cout<<"generate pbrief successfully"<<std::endl;
         #else
         pbrief_  = cv::ORB::create(500, 1., 0);
         std::cout << "\n\n=======================================================================\n";
@@ -251,7 +252,9 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     }
 
     // std::cout << "\nCOmputing desc for #" << vkps.size() << " kps\n";
-
+    cv::imshow("show img", im);
+    cv::waitKey(-1);
+    cv::destroyAllWindows();
     pbrief_->compute(im, vkps, descs);
 
     std::cout << "\nDesc computed for #" << vkps.size() << " kps\n";
