@@ -250,15 +250,17 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
         std::cout << "\n\n=======================================================================\n\n";
         #endif
     }
-    for(int i=0; i<vkps.size(); ++i){
-        std::cout<<vkps[i].pt<<std::endl;
-    }
+    // for(int i=0; i<vkps.size(); ++i){
+    //     std::cout<<vkps[i].pt<<std::endl;
+    // }
     // std::cout << "\nCOmputing desc for #" << vkps.size() << " kps\n";
-    // cv::imshow("show img", im);
-    // cv::waitKey(-1);
-    // cv::destroyAllWindows();
-    pbrief_->compute(im, vkps, descs);
 
+    pbrief_->compute(im, vkps, descs);
+    cv::Mat img_show;
+    cv::drawKeypoints(im, vkps, img_show);
+    cv::imshow("show img", img_show);
+    cv::waitKey(-1);
+    cv::destroyAllWindows();
     std::cout << "\nDesc computed for #" << vkps.size() << " kps\n";
     
     if( vkps.empty()) {
