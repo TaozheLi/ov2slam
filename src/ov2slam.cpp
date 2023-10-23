@@ -137,7 +137,7 @@ void SlamManager::run()
             // Update current frame
             frame_id_++;
             pcurframe_->updateFrame(frame_id_, time);
-
+            std::cout<<"updating frame successfully"<<std::endl;
             // Update cam delay for automatic exit
             if( frame_id_ > 0 ) {
                 cam_delay = ros::Time::now().toSec() - last_img_time;
@@ -149,7 +149,7 @@ void SlamManager::run()
             // Display info on current frame state
             if( pslamstate_->debug_ )
                 pcurframe_->displayFrameInfo();
-
+            std::cout<<"displayFrameInfo() successfully"<<stdLLendl;
             // 1. Send images to the FrontEnd
             // =============================================
             if( pslamstate_->debug_ )
