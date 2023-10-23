@@ -250,7 +250,9 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
         std::cout << "\n\n=======================================================================\n\n";
         #endif
     }
-
+    for(int i=0; i<vkps.size(); ++i){
+        std::cout<<vkps[i].pt<<std::endl;
+    }
     // std::cout << "\nCOmputing desc for #" << vkps.size() << " kps\n";
     // cv::imshow("show img", im);
     // cv::waitKey(-1);
@@ -267,6 +269,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     size_t k = 0;
     std::cout<<"print descriptors"<<std::endl;
     std::cout<<descs<<std::endl;
+    
     for( size_t i = 0 ; i < nbkps ; i++ ) 
     {
         std::cout<<"in loop"<<std::endl;
