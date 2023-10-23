@@ -43,17 +43,18 @@ bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time)
     
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::Start("0.Full-Front_End");
-    cv::imshow("image used for tracking", iml);
-    cv::waitKey(-1);
-    cv::destroyAllWindows();
+    // cv::imshow("image used for tracking", iml);
+    // cv::waitKey(-1);
+    // cv::destroyAllWindows();
     bool iskfreq = trackMono(iml, time);
-
+    std::cout<<"track Mono successfully"<<std::endl;
     if( iskfreq ) {
         pmap_->createKeyframe(cur_img_, iml);
-
+        std::cout<<"creating key frame successfully"<<std::endl;
         if( pslamstate_->btrack_keyframetoframe_ ) {
             cv::buildOpticalFlowPyramid(cur_img_, kf_pyr_, pslamstate_->klt_win_size_, pslamstate_->nklt_pyr_lvl_);
         }
+        std::cout<<"build Optimical Flow Pyramid successfully"<<std::endl;
     }
 
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
