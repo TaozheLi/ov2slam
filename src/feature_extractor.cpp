@@ -255,7 +255,6 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     //     std::cout<<vkps[i].pt<<std::endl;
     // }
     // std::cout << "\nCOmputing desc for #" << vkps.size() << " kps\n";
-    pbrief_ = cv::ORB::create(500, 1.0, 0);
     pbrief_->compute(im, vkps, descs);
     // cv::Mat img_show;
     // cv::drawKeypoints(im, vkps, img_show);
