@@ -149,14 +149,13 @@ void SlamManager::run()
             // Display info on current frame state
             if( pslamstate_->debug_ )
                 pcurframe_->displayFrameInfo();
-            std::cout<<"displayFrameInfo() successfully"<<std::endl;
             // 1. Send images to the FrontEnd
             // =============================================
             if( pslamstate_->debug_ )
                 std::cout << "\n \t >>> [SLAM Node] New image send to Front-End\n";
-
+            std::cout<<"visual tracking"<<std::endl;
             bool is_kf_req = pvisualfrontend_->visualTracking(img_left, time);
-
+            std::cout<<"visual tracking successfully"<<std::endl;
             // Save current pose
             Logger::addSE3Pose(time, pcurframe_->getTwc(), is_kf_req);
 
