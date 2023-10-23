@@ -262,6 +262,8 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     }
     std::cout<<"vkps is not empty"<<std::endl;
     size_t k = 0;
+    std::cout<<"print descriptors"<<std::endl;
+    std::cout<<descs<<std::endl;
     for( size_t i = 0 ; i < nbkps ; i++ ) 
     {
         std::cout<<"in loop"<<std::endl;
