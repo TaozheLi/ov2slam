@@ -280,7 +280,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
 
     assert( vdescs.size() == vpts.size() );
 
-    // std::cout << "\n \t >>> describeBRIEF : " << vkps.size() << " kps described!\n";
+    std::cout << "\n \t >>> describeBRIEF : " << vkps.size() << " kps described!\n";
 
     return vdescs;
 }
