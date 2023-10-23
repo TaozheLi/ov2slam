@@ -259,7 +259,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
 
     std::cout << "\nDesc computed for #" << vkps.size() << " kps\n";
     
-    if( vkps.empty() || descs.empty()) {
+    if( vkps.empty()) {
         return std::vector<cv::Mat>(nbkps, cv::Mat());
         std::cout<<"vkps is empty"<<std::endl;
     }
