@@ -264,6 +264,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     size_t k = 0;
     for( size_t i = 0 ; i < nbkps ; i++ ) 
     {
+        std::cout<<"in loop"<<std::endl;
         if( k < vkps.size() ) {
             if( vkps[k].pt == vpts[i] ) {
                 // vdescs.push_back(descs.row(k).clone());
