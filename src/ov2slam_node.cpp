@@ -191,17 +191,17 @@ int main(int argc, char** argv)
 
     std::shared_ptr<SlamParams> pparams;
     pparams.reset( new SlamParams(fsSettings) );
-
+    std::cout<<"run SlamParams successfully"<<std::endl;
     // Create the ROS Visualizer
     std::shared_ptr<RosVisualizer> prosviz;
     prosviz.reset( new RosVisualizer(nh) );
-
+    std::cout<<"run RosVisualizer successfully ++++++++++++++"<<std::endl;
     // Setting up the SLAM Manager
     SlamManager slam(pparams, prosviz);
 
     // Start the SLAM thread
     std::thread slamthread(&SlamManager::run, &slam);
-
+    std::cout<<"run slam manager run()!!!!!! ++++++++++++++"<<std::endl;
     // Create the Bag file reader & callback functions
     SensorsGrabber sb(&slam);
 
