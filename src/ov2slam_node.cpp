@@ -76,6 +76,11 @@ public:
         {
             ROS_ERROR("\n\n\ncv_bridge exeception: %s\n\n\n", e.what());
         }
+        if( ptr->image.channels() == 3 ) {
+            cv::Mat gray_img;
+            cv::cvtColor(ptr->image, gray_img, cv::COLOR_RGB2GRAY);
+            return gray_img;
+        }
 
         return ptr->image;
     }
