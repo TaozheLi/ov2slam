@@ -240,7 +240,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
 
     if( pbrief_ == nullptr ) {
         #ifdef OPENCV_CONTRIB
-        pbrief_ = cv::xfeatures2d::BriefDescriptorExtractor::create();
+        pbrief_ = cv::xfeatures2d::ORB::create(int nfeatures=500, float scaleFactor=1.2f, int nlevels=8, int edgeThreshold=31, int firstLevel=0, int WTA_K=2, int scoreType=ORB::HARRIS_SCORE, int patchSize=31, int fastThreshold=20);
         std::cout<<"generate pbrief successfully"<<std::endl;
         #else
         pbrief_  = cv::ORB::create(500, 1., 0);
