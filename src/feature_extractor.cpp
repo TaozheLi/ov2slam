@@ -237,8 +237,8 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
     cv::KeyPoint::convert(vpts, vkps);
 
     cv::Mat descs;
-
     if( pbrief_ == nullptr ) {
+        std::cout<<"pbrief is nullptr"<<std::endl;
         #ifdef OPENCV_CONTRIB
         pbrief_ = cv::xfeatures2d::BriefDescriptorExtractor::create();
         // pbrief_ = cv::ORB::create(500, 1., 0);
