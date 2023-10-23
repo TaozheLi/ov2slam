@@ -109,16 +109,19 @@ public:
                     // sync tolerance
                     if(time0 < time1 - 0.015)
                     {
+                        std::cout<<"time0 < time1 - 0.015"<<std::endl;
                         img0_buf.pop();
                         std::cout << "\n Throw img0 -- Sync error : " << (time0 - time1) << "\n";
                     }
                     else if(time0 > time1 + 0.015)
                     {
                         img1_buf.pop();
+                        std::cout<<"time0 > time 1 + 0.015"<<std::endl;
                         std::cout << "\n Throw img1 -- Sync error : " << (time0 - time1) << "\n";
                     }
                     else
                     {
+                        std::cout<<"try to getGrayImageFromMsg"<<std::endl;
                         image0 = getGrayImageFromMsg(img0_buf.front());
                         image1 = getGrayImageFromMsg(img1_buf.front());
                         img0_buf.pop();
@@ -127,6 +130,7 @@ public:
                         if( !image0.empty() && !image1.empty() ) {
                             pslam_->addNewStereoImages(time0, image0, image1);
                         }
+                        std::cout<<"finished to get GrayImageFromMsg"<<std::endl;
                     }
                 }
             } 
