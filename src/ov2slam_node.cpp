@@ -95,12 +95,14 @@ public:
         {
             if( pslam_->pslamstate_->stereo_ )
             {
+                std::cout<<"input image is stereo"<<std::endl;
                 cv::Mat image0, image1;
 
                 std::lock_guard<std::mutex> lock(img_mutex);
 
                 if (!img0_buf.empty() && !img1_buf.empty())
                 {
+                    std::cout<<"run there!!!!!!!!!"<<std::endl;
                     double time0 = img0_buf.front()->header.stamp.toSec();
                     double time1 = img1_buf.front()->header.stamp.toSec();
 
@@ -191,17 +193,14 @@ int main(int argc, char** argv)
 
     std::shared_ptr<SlamParams> pparams;
     pparams.reset( new SlamParams(fsSettings) );
-    std::cout<<"run SlamParams successfully"<<std::endl;
     // Create the ROS Visualizer
     std::shared_ptr<RosVisualizer> prosviz;
     prosviz.reset( new RosVisualizer(nh) );
-    std::cout<<"run RosVisualizer successfully ++++++++++++++"<<std::endl;
     // Setting up the SLAM Manager
     SlamManager slam(pparams, prosviz);
 
     // Start the SLAM thread
     std::thread slamthread(&SlamManager::run, &slam);
-    std::cout<<"run slam manager run()!!!!!! ++++++++++++++"<<std::endl;
     // Create the Bag file reader & callback functions
     SensorsGrabber sb(&slam);
 
