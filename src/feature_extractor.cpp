@@ -272,9 +272,11 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
                 k++;
             }
             else {
+                std::cout<<"k < vpts.size(), push cv::Mat()"<<std::endl;
                 vdescs.push_back(cv::Mat());
             }
         } else {
+            std::cout<<"k > vpts.size(), push cv::Mat()"<<std::endl;
             vdescs.push_back(cv::Mat());
         }
     }
