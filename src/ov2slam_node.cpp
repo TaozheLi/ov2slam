@@ -95,11 +95,9 @@ public:
         {
             if( pslam_->pslamstate_->stereo_ )
             {
-                std::cout<<"input image is stereo"<<std::endl;
                 cv::Mat image0, image1;
 
                 std::lock_guard<std::mutex> lock(img_mutex);
-                std::cout<<!img0_buf.empty()<<" "<<!img1_buf.empty()<<std::endl;
                 if (!img0_buf.empty() && !img1_buf.empty())
                 {
                     std::cout<<"run there!!!!!!!!!"<<std::endl;

@@ -267,9 +267,7 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
         return std::vector<cv::Mat>(nbkps, cv::Mat());
         std::cout<<"vkps is empty"<<std::endl;
     }
-    std::cout<<"vkps is not empty"<<std::endl;
     size_t k = 0;
-    std::cout<<"print descriptors"<<std::endl;
     std::cout<<descs<<std::endl;
     
     for( size_t i = 0 ; i < nbkps ; i++ ) 
@@ -278,17 +276,13 @@ std::vector<cv::Mat> FeatureExtractor::describeBRIEF(const cv::Mat &im, const st
         if( k < vkps.size() ) {
             if( vkps[k].pt == vpts[i] ) {
                 // vdescs.push_back(descs.row(k).clone());
-                std::cout<<"in there"<<std::endl;
-                std::cout<<descs.row(k)<<std::endl;
                 vdescs.push_back(descs.row(k));
                 k++;
             }
             else {
-                std::cout<<"k < vpts.size(), push cv::Mat()"<<std::endl;
                 vdescs.push_back(cv::Mat());
             }
         } else {
-            std::cout<<"k > vpts.size(), push cv::Mat()"<<std::endl;
             vdescs.push_back(cv::Mat());
         }
     }
