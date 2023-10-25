@@ -43,6 +43,7 @@ bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time)
     
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::Start("0.Full-Front_End");
+    std::cout<<"I'm in visualTracking place"<<std::endl;
     cv::imshow("image used for tracking", iml);
     cv::waitKey(-1);
     cv::destroyAllWindows();
