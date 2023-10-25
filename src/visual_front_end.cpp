@@ -43,9 +43,9 @@ bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time)
     
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::Start("0.Full-Front_End");
-    // cv::imshow("image used for tracking", iml);
-    // cv::waitKey(-1);
-    // cv::destroyAllWindows();
+    cv::imshow("image used for tracking", iml);
+    cv::waitKey(-1);
+    cv::destroyAllWindows();
     bool iskfreq = trackMono(iml, time);
     std::cout<<"track Mono successfully"<<std::endl;
     if( iskfreq ) {
