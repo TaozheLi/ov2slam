@@ -91,9 +91,9 @@ endif (Eigen3_FOUND)
 # add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 
 #OpenGV
-find_package(opengv QUIET)
+#find_package(opengv QUIET)
 # Bug include CMake 1.17
-get_target_property(opengv_INCLUDE_DIR opengv INTERFACE_INCLUDE_DIRECTORIES)
+#get_target_property(opengv_INCLUDE_DIR opengv INTERFACE_INCLUDE_DIRECTORIES)
 
 if (opengv_FOUND)
   message(STATUS "Found Opengv lib : ${opengv_INCLUDE_DIR} - ${opengv_DIR}")

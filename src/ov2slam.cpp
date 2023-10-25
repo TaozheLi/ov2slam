@@ -130,10 +130,8 @@ void SlamManager::run()
 
         // 0. Get New Images
         // =============================================
-        std::cout<<"run getNewImage"<<std::endl;
         if( getNewImage(img_left, img_right, time) )
         {
-            std::cout<<"run getNewImage successfully"<<std::endl;
             // Update current frame
             frame_id_++;
             pcurframe_->updateFrame(frame_id_, time);
