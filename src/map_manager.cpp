@@ -31,7 +31,7 @@
 #include "map_manager.hpp"
 
 MapManager::MapManager(std::shared_ptr<SlamParams> pstate, std::shared_ptr<Frame> pframe, std::shared_ptr<FeatureExtractor> pfeatextract, std::shared_ptr<FeatureTracker> ptracker)
-    : nlmid_(0), nkfid_(0), nblms_(0), nbkfs_(0), pslamstate_(pstate), pfeatextract_(pfeatextract), ptracker_(ptracker), pcurframe_(pframe)
+        : nlmid_(0), nkfid_(0), nblms_(0), nbkfs_(0), pslamstate_(pstate), pfeatextract_(pfeatextract), ptracker_(ptracker), pcurframe_(pframe)
 {
     pcloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() );
     pcloud_->points.reserve(1e5);
@@ -100,7 +100,7 @@ void MapManager::prepareFrame()
 
         // Get the related MP
         auto plmit = map_plms_.find(kp.lmid_);
-        
+
         if( plmit == map_plms_.end() ) {
             removeObsFromCurFrameById(kp.lmid_);
             continue;
@@ -127,18 +127,18 @@ void MapManager::updateFrameCovisibility(Frame &frame)
 
         // Get the related MP
         auto plmit = map_plms_.find(kp.lmid_);
-        
+
         if( plmit == map_plms_.end() ) {
             removeMapPointObs(kp.lmid_, frame.kfid_);
             removeObsFromCurFrameById(kp.lmid_);
             continue;
         }
 
-        // Get the set of KFs observing this KF to update 
+        // Get the set of KFs observing this KF to update
         // covisible KFs
-        for( const auto &kfid : plmit->second->getKfObsSet() ) 
+        for( const auto &kfid : plmit->second->getKfObsSet() )
         {
-            if( kfid != frame.kfid_ ) 
+            if( kfid != frame.kfid_ )
             {
                 auto it = map_covkfs.find(kfid);
                 if( it != map_covkfs.end() ) {
@@ -152,13 +152,13 @@ void MapManager::updateFrameCovisibility(Frame &frame)
 
     // Update covisibility for covisible KFs
     std::set<int> set_badkfids;
-    for( const auto &kfid_cov : map_covkfs ) 
+    for( const auto &kfid_cov : map_covkfs )
     {
         int kfid = kfid_cov.first;
         int covscore = kfid_cov.second;
-        
+
         auto pkfit = map_pkfs_.find(kfid);
-        if( pkfit != map_pkfs_.end() ) 
+        if( pkfit != map_pkfs_.end() )
         {
             // Will emplace or update covisiblity
             pkfit->second->map_covkfs_[frame.kfid_] = covscore;
@@ -177,7 +177,7 @@ void MapManager::updateFrameCovisibility(Frame &frame)
     for( const auto &kfid : set_badkfids ) {
         map_covkfs.erase(kfid);
     }
-    
+
     // Update the set of covisible KFs
     frame.map_covkfs_.swap(map_covkfs);
 
@@ -187,7 +187,7 @@ void MapManager::updateFrameCovisibility(Frame &frame)
     } else {
         frame.set_local_mapids_.insert(set_local_mapids.begin(), set_local_mapids.end());
     }
-    
+
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::StopAndDisplay(pslamstate_->debug_, "1.KF_updateFrameCovisilbity");
 }
@@ -195,7 +195,7 @@ void MapManager::updateFrameCovisibility(Frame &frame)
 void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Point2f> &vpts, Frame &frame)
 {
     std::lock_guard<std::mutex> lock(lm_mutex_);
-    
+
     // Add keypoints + create MPs
     size_t nbpts = vpts.size();
     for( size_t i = 0 ; i < nbpts ; i++ ) {
@@ -208,11 +208,11 @@ void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Po
     }
 }
 
-void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Point2f> &vpts, 
-    const std::vector<int> &vscales, Frame &frame)
+void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Point2f> &vpts,
+                                     const std::vector<int> &vscales, Frame &frame)
 {
     std::lock_guard<std::mutex> lock(lm_mutex_);
-    
+
     // Add keypoints + create landmarks
     size_t nbpts = vpts.size();
     for( size_t i = 0 ; i < nbpts ; i++ )
@@ -229,7 +229,7 @@ void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Po
 void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Point2f> &vpts, const std::vector<cv::Mat> &vdescs, Frame &frame)
 {
     std::lock_guard<std::mutex> lock(lm_mutex_);
-    
+
     // Add keypoints + create landmarks
     size_t nbpts = vpts.size();
     for( size_t i = 0 ; i < nbpts ; i++ )
@@ -241,7 +241,7 @@ void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Po
             // Create landmark with same id
             cv::Scalar col = im.at<uchar>(vpts.at(i).y,vpts.at(i).x);
             addMapPoint(vdescs.at(i), col);
-        } 
+        }
         else {
             // Add keypoint to current frame
             frame.addKeypoint(vpts.at(i), nlmid_);
@@ -254,11 +254,11 @@ void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Po
 }
 
 
-void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Point2f> &vpts, const std::vector<int> &vscales, const std::vector<float> &vangles, 
-                        const std::vector<cv::Mat> &vdescs, Frame &frame)
+void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Point2f> &vpts, const std::vector<int> &vscales, const std::vector<float> &vangles,
+                                     const std::vector<cv::Mat> &vdescs, Frame &frame)
 {
     std::lock_guard<std::mutex> lock(lm_mutex_);
-    
+
     // Add keypoints + create landmarks
     size_t nbpts = vpts.size();
     for( size_t i = 0 ; i < nbpts ; i++ )
@@ -270,7 +270,7 @@ void MapManager::addKeypointsToFrame(const cv::Mat &im, const std::vector<cv::Po
             // Create landmark with same id
             cv::Scalar col = im.at<uchar>(vpts.at(i).y,vpts.at(i).x);
             addMapPoint(vdescs.at(i), col);
-        } 
+        }
         else {
             // Add keypoint to current frame
             frame.addKeypoint(vpts.at(i), nlmid_);
@@ -311,10 +311,10 @@ void MapManager::extractKeypoints(const cv::Mat &im, const cv::Mat &imraw)
 
         if( pslamstate_->use_shi_tomasi_ ) {
             vnewpts = pfeatextract_->detectGFTT(im, vpts, pcurframe_->pcalib_leftcam_->roi_mask_, nb2detect);
-        } 
+        }
         else if( pslamstate_->use_fast_ ) {
             vnewpts = pfeatextract_->detectGridFAST(im, pslamstate_->nmaxdist_, vpts, pcurframe_->pcalib_leftcam_->roi_rect_);
-        } 
+        }
         else if ( pslamstate_->use_singlescale_detector_ ) {
             vnewpts = pfeatextract_->detectSingleScale(im, pslamstate_->nmaxdist_, vpts, pcurframe_->pcalib_leftcam_->roi_rect_);
         } else {
@@ -327,9 +327,9 @@ void MapManager::extractKeypoints(const cv::Mat &im, const cv::Mat &imraw)
                 std::vector<cv::Mat> vdescs;
                 vdescs = pfeatextract_->describeBRIEF(imraw, vnewpts);
                 addKeypointsToFrame(im, vnewpts, vdescs, *pcurframe_);
-            } 
-            else if( pslamstate_->use_shi_tomasi_ || pslamstate_->use_fast_ 
-                || pslamstate_->use_singlescale_detector_ ) 
+            }
+            else if( pslamstate_->use_shi_tomasi_ || pslamstate_->use_fast_
+                     || pslamstate_->use_singlescale_detector_ )
             {
                 addKeypointsToFrame(im, vnewpts, *pcurframe_);
             }
@@ -364,7 +364,7 @@ void MapManager::describeKeypoints(const cv::Mat &im, const std::vector<Keypoint
 
 // This function is responsible for performing stereo matching operations
 // for the means of triangulation
-void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftpyr, const std::vector<cv::Mat> &vrightpyr) 
+void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftpyr, const std::vector<cv::Mat> &vrightpyr)
 {
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::Start("1.KF_stereoMatching");
@@ -379,7 +379,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
 
     float uppyrcoef = std::pow(2,pslamstate_->nklt_pyr_lvl_);
     float downpyrcoef = 1. / uppyrcoef;
-    
+
     std::vector<int> v3dkpids, vkpids, voutkpids, vpriorids;
     std::vector<cv::Point2f> v3dkps, v3dpriors, vkps, vpriors;
 
@@ -411,13 +411,13 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
                     v3dpriors.push_back(projpt);
                     v3dkpids.push_back(kp.lmid_);
                     continue;
-                } 
+                }
             } else {
                 removeMapPointObs(kp.lmid_, frame.kfid_);
                 continue;
             }
-        } 
-        
+        }
+
         // If stereo rect images, prior from SAD
         if( pslamstate_->bdo_stereo_rect_ ) {
 
@@ -439,7 +439,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
             const size_t nbmin3dcokps = 1;
 
             auto vnearkps = frame.getSurroundingKeypoints(kp);
-            if( vnearkps.size() >= nbmin3dcokps ) 
+            if( vnearkps.size() >= nbmin3dcokps )
             {
                 std::vector<Keypoint> vnear3dkps;
                 vnear3dkps.reserve(vnearkps.size());
@@ -450,7 +450,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
                 }
 
                 if( vnear3dkps.size() >= nbmin3dcokps ) {
-                
+
                     size_t nb3dkp = 0;
                     double mean_z = 0.;
                     double weights = 0.;
@@ -471,7 +471,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
 
                         cv::Point2f projpt = frame.projCamToRightImageDist(predcampt);
 
-                        if( frame.isInRightImage(projpt) ) 
+                        if( frame.isInRightImage(projpt) )
                         {
                             v3dkps.push_back(kp.px_);
                             v3dpriors.push_back(projpt);
@@ -488,14 +488,14 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
         vpriors.push_back(priorpt);
     }
 
-    // Storing good tracks   
+    // Storing good tracks
     std::vector<cv::Point2f> vgoodrkps;
     std::vector<int> vgoodids;
     vgoodrkps.reserve(nbkps);
     vgoodids.reserve(nbkps);
 
     // 1st track 3d kps if using prior
-    if( !v3dpriors.empty() ) 
+    if( !v3dpriors.empty() )
     {
         size_t nbpyrlvl = 1;
         int nwinsize = pslamstate_->nklt_win_size_; // What about a smaller window here?
@@ -508,20 +508,20 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
         std::vector<bool> vkpstatus;
 
         ptracker_->fbKltTracking(
-                    vleftpyr, 
-                    vrightpyr, 
-                    nwinsize, 
-                    nbpyrlvl, 
-                    pslamstate_->nklt_err_, 
-                    pslamstate_->fmax_fbklt_dist_, 
-                    v3dkps, 
-                    v3dpriors, 
-                    vkpstatus);
+                vleftpyr,
+                vrightpyr,
+                nwinsize,
+                nbpyrlvl,
+                pslamstate_->nklt_err_,
+                pslamstate_->fmax_fbklt_dist_,
+                v3dkps,
+                v3dpriors,
+                vkpstatus);
 
         size_t nbgood = 0;
         size_t nb3dkps = v3dkps.size();
-        
-        for(size_t i = 0 ; i < nb3dkps  ; i++ ) 
+
+        for(size_t i = 0 ; i < nb3dkps  ; i++ )
         {
             if( vkpstatus.at(i) ) {
                 vgoodrkps.push_back(v3dpriors.at(i));
@@ -536,32 +536,32 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
             }
         }
 
-        if( pslamstate_->debug_ ) 
-            std::cout << "\n >>> Stereo KLT Tracking on priors : " << nbgood 
-                << " out of " << nb3dkps << " kps tracked!\n";
+        if( pslamstate_->debug_ )
+            std::cout << "\n >>> Stereo KLT Tracking on priors : " << nbgood
+                      << " out of " << nb3dkps << " kps tracked!\n";
     }
 
     // 2nd track other kps if any
-    if( !vkps.empty() ) 
+    if( !vkps.empty() )
     {
         // Good / bad kps vector
         std::vector<bool> vkpstatus;
 
         ptracker_->fbKltTracking(
-                    vleftpyr, 
-                    vrightpyr, 
-                    pslamstate_->nklt_win_size_, 
-                    pslamstate_->nklt_pyr_lvl_, 
-                    pslamstate_->nklt_err_, 
-                    pslamstate_->fmax_fbklt_dist_, 
-                    vkps, 
-                    vpriors, 
-                    vkpstatus);
+                vleftpyr,
+                vrightpyr,
+                pslamstate_->nklt_win_size_,
+                pslamstate_->nklt_pyr_lvl_,
+                pslamstate_->nklt_err_,
+                pslamstate_->fmax_fbklt_dist_,
+                vkps,
+                vpriors,
+                vkpstatus);
 
         size_t nbgood = 0;
         size_t nb2dkps = vkps.size();
 
-        for(size_t i = 0 ; i < nb2dkps  ; i++ ) 
+        for(size_t i = 0 ; i < nb2dkps  ; i++ )
         {
             if( vkpstatus.at(i) ) {
                 vgoodrkps.push_back(vpriors.at(i));
@@ -572,7 +572,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
 
         if( pslamstate_->debug_ )
             std::cout << "\n >>> Stereo KLT Tracking w. no priors : " << nbgood
-                << " out of " << nb2dkps << " kps tracked!\n";
+                      << " out of " << nb2dkps << " kps tracked!\n";
     }
 
     nbkps = vgoodids.size();
@@ -580,7 +580,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
 
     float epi_err = 0.;
 
-    for( size_t i = 0; i < nbkps ; i++ ) 
+    for( size_t i = 0; i < nbkps ; i++ )
     {
         cv::Point2f lunpx = frame.getKeypointById(vgoodids.at(i)).unpx_;
         cv::Point2f runpx = frame.pcalib_rightcam_->undistortImagePoint(vgoodrkps.at(i));
@@ -594,8 +594,8 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
         else {
             epi_err = MultiViewGeometry::computeSampsonDistance(frame.Frl_, lunpx, runpx);
         }
-        
-        if( epi_err <= 2. ) 
+
+        if( epi_err <= 2. )
         {
             frame.updateKeypointStereo(vgoodids.at(i), vgoodrkps.at(i));
             nbgood++;
@@ -604,7 +604,7 @@ void MapManager::stereoMatching(Frame &frame, const std::vector<cv::Mat> &vleftp
 
     if( pslamstate_->debug_ )
         std::cout << "\n \t>>> Nb of stereo tracks: " << nbgood
-            << " out of " << nbkps << "\n";
+                  << " out of " << nbkps << "\n";
 
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::StopAndDisplay(pslamstate_->debug_, "1.KF_stereoMatching");
@@ -620,7 +620,7 @@ Eigen::Vector3d MapManager::computeTriangulation(const Sophus::SE3d &T, const Ei
 // This function copies cur. Frame to add it to the KF map
 void MapManager::addKeyframe()
 {
-    // Create a copy of Cur. Frame shared_ptr for creating an 
+    // Create a copy of Cur. Frame shared_ptr for creating an
     // independant KF to add to the map
     std::shared_ptr<Frame> pkf = std::allocate_shared<Frame>(Eigen::aligned_allocator<Frame>(), *pcurframe_);
 
@@ -648,10 +648,10 @@ void MapManager::addMapPoint(const cv::Scalar &color)
     if( plm->isobs_ ) {
         colored_pt = pcl::PointXYZRGB(255, 0, 0);
     } else {
-        colored_pt = pcl::PointXYZRGB(plm->color_[0] 
-                                    , plm->color_[0]
-                                    , plm->color_[0]
-                                    );
+        colored_pt = pcl::PointXYZRGB(plm->color_[0]
+                , plm->color_[0]
+                , plm->color_[0]
+        );
     }
     colored_pt.x = 0.;
     colored_pt.y = 0.;
@@ -676,10 +676,10 @@ void MapManager::addMapPoint(const cv::Mat &desc, const cv::Scalar &color)
     if( plm->isobs_ ) {
         colored_pt = pcl::PointXYZRGB(255, 0, 0);
     } else {
-        colored_pt = pcl::PointXYZRGB(plm->color_[0] 
-                                    , plm->color_[0]
-                                    , plm->color_[0]
-                                    );
+        colored_pt = pcl::PointXYZRGB(plm->color_[0]
+                , plm->color_[0]
+                , plm->color_[0]
+        );
     }
     colored_pt.x = 0.;
     colored_pt.y = 0.;
@@ -727,7 +727,7 @@ void MapManager::updateMapPoint(const int lmid, const Eigen::Vector3d &wpt, cons
         return;
     }
 
-    // If MP 2D -> 3D => Notif. KFs 
+    // If MP 2D -> 3D => Notif. KFs
     if( !plmit->second->is3d_ ) {
         for( const auto &kfid : plmit->second->getKfObsSet() ) {
             auto pkfit = map_pkfs_.find(kfid);
@@ -754,10 +754,10 @@ void MapManager::updateMapPoint(const int lmid, const Eigen::Vector3d &wpt, cons
     if(plmit->second->isobs_ ) {
         colored_pt = pcl::PointXYZRGB(255, 0, 0);
     } else {
-        colored_pt = pcl::PointXYZRGB(plmit->second->color_[0] 
-                                    , plmit->second->color_[0]
-                                    , plmit->second->color_[0]
-                                    );
+        colored_pt = pcl::PointXYZRGB(plmit->second->color_[0]
+                , plmit->second->color_[0]
+                , plmit->second->color_[0]
+        );
     }
     colored_pt.x = wpt.x();
     colored_pt.y = wpt.y();
@@ -832,7 +832,7 @@ void MapManager::mergeMapPoints(const int prevlmid, const int newlmid)
     std::unordered_map<int, cv::Mat> map_prev_kf_desc_ = pprevlmit->second->map_kf_desc_;
 
     // 3. Update new MP and related KF / cur Frame
-    for( const auto &pkfid : setprevkfids ) 
+    for( const auto &pkfid : setprevkfids )
     {
         // Get prev KF and update keypoint
         auto pkfit =  map_pkfs_.find(pkfid);
@@ -857,7 +857,7 @@ void MapManager::mergeMapPoints(const int prevlmid, const int newlmid)
 
     // Turn new MP observed by cur Frame if prev MP
     // was + update cur Frame's kp ref to new MP
-    if( pcurframe_->isObservingKp(prevlmid) ) 
+    if( pcurframe_->isObservingKp(prevlmid) )
     {
         if( pcurframe_->updateKeypointId(prevlmid, newlmid, pnewlmit->second->is3d_) )
         {
@@ -866,12 +866,12 @@ void MapManager::mergeMapPoints(const int prevlmid, const int newlmid)
     }
 
     if( pprevlmit->second->is3d_ ) {
-        nblms_--; 
+        nblms_--;
     }
 
     // Erase MP and update nb MPs
     map_plms_.erase( pprevlmit );
-    
+
     // Visualization related part for pointcloud obs
     pcl::PointXYZRGB colored_pt;
     colored_pt = pcl::PointXYZRGB(0, 0, 0);
@@ -929,7 +929,7 @@ void MapManager::removeMapPoint(const int lmid)
     // Skip if MP does not exist
     if( plmit != map_plms_.end() ) {
         // Remove all observations from KFs
-        for( const auto &kfid : plmit->second->getKfObsSet() ) 
+        for( const auto &kfid : plmit->second->getKfObsSet() )
         {
             auto pkfit = map_pkfs_.find(kfid);
             if( pkfit == map_pkfs_.end() ) {
@@ -950,7 +950,7 @@ void MapManager::removeMapPoint(const int lmid)
         }
 
         if( plmit->second->is3d_ ) {
-            nblms_--; 
+            nblms_--;
         }
 
         // Erase MP and update nb MPs
@@ -1022,7 +1022,7 @@ void MapManager::removeObsFromCurFrameById(const int lmid)
 {
     // Remove cur obs
     pcurframe_->removeKeypointById(lmid);
-    
+
     // Set MP as not obs
     auto plmit = map_plms_.find(lmid);
 
@@ -1039,18 +1039,18 @@ void MapManager::removeObsFromCurFrameById(const int lmid)
     plmit->second->isobs_ = false;
 
     // Update MP color
-    colored_pt = pcl::PointXYZRGB(plmit->second->color_[0] 
-                                , plmit->second->color_[0]
-                                , plmit->second->color_[0]
-                                );
-                                
+    colored_pt = pcl::PointXYZRGB(plmit->second->color_[0]
+            , plmit->second->color_[0]
+            , plmit->second->color_[0]
+    );
+
     colored_pt.x = pcloud_->points.at(lmid).x;
     colored_pt.y = pcloud_->points.at(lmid).y;
     colored_pt.z = pcloud_->points.at(lmid).z;
     pcloud_->points.at(lmid) = colored_pt;
 }
 
-bool MapManager::setMapPointObs(const int lmid) 
+bool MapManager::setMapPointObs(const int lmid)
 {
     if( lmid >= (int)pcloud_->points.size() ) {
         return false;

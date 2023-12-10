@@ -30,7 +30,13 @@ set(CMAKE_BUILD_TYPE "Release")
 # opengv and ov2slam without -march=native or re-compile
 # ceres with it
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -march=native -g")
-
+set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+enable_language(CUDA)
+include_directories(${PROJECT_SOURCE_DIR}/include/)
+include_directories(${PROJECT_SOURCE_DIR}/plugin)
+include_directories(/usr/local/cuda/include)
+link_directories(/usr/local/cuda/lib64)
+link_directories(/home/rushmian/Downloads/TensorRT-8.2.2.1/lib)
 
 if(WITH_OPENCV_CONTRIB)
     message("\nGoing to use OpenCV contrib! (WITH_OPENCV_CONTRIB is set to : ${WITH_OPENCV_CONTRIB}.
@@ -70,7 +76,7 @@ endif ( )
 ## System dependencies are found with CMake's conventions
 
 # OpenCV
-find_package(OpenCV REQUIRED)
+find_package(OpenCV  3.4 REQUIRED)
 
 if(OpenCV_VERSION_MAJOR LESS 3)
   message( FATAL_ERROR "OpenCV 3 or 4 is required!  Current version : ${OpenCV_VERSION}" )
@@ -81,6 +87,9 @@ if(OpenCV_VERSION VERSION_LESS "3.3.0")
   add_definitions(-DOPENCV_LAMBDA_MISSING)
 endif()
 
+if(OpenCV_FOUND)
+  message(STATUS "Found OpenCV lib : ${OpenCV_VERSION} - ${OpenCV_LIBS}")
+endif(OpenCV_FOUND)
 #Eigen3
 find_package(Eigen3 3.3.0 REQUIRED NO_MODULE)
 
@@ -144,8 +153,18 @@ add_library(${PROJECT_NAME}
   src/optimizer.cpp
   src/estimator.cpp
   src/loop_closer.cpp
+  src/calibrator.cpp
+  src/postprocess.cpp
+  src/model.cpp
+  include/preprocess.cu
 )
 
+include_directories(/home/rushmian/Downloads/TensorRT-8.2.2.1/include/)
+link_directories(/home/rushmian/Downloads/TensorRT-8.2.2.1/lib/)
+# file(GLOB SOURCES "include/*.h" "src/*.cpp" "plugin/*.h" "include/*.cu")
+file(GLOB_RECURSE PLUGIN_SRCS "plugin/*.cu")
+file(GLOB_RECURSE CORE_LIB "/usr/local/lib/libopencv_core.so.3.4")
+add_library(myplugins SHARED ${PLUGIN_SRCS})
 
 # Add mandatory dependencies
 target_include_directories(${PROJECT_NAME}
@@ -153,6 +172,11 @@ target_include_directories(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/include
     ${catkin_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include/ceres_parametrization
+    # ${PLUGIN_SRCS}
+    ${PROJECT_SOURCE_DIR}/plugin
+    /usr/local/cuda/include
+    /home/rushmian/Downloads/TensorRT-8.2.2.1/include/
+    
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -160,8 +184,14 @@ target_link_libraries(${PROJECT_NAME}
       ${catkin_LIBRARIES}
       Eigen3::Eigen
       Sophus::Sophus
+      nvinfer 
+      cudart 
+      myplugins
+      
     PRIVATE
       ${OpenCV_LIBS}
+
+#      /usr/local/lib/libopencv_core.so.3.4
       Ceres::ceres
 )
 
@@ -205,5 +235,7 @@ add_backward(${PROJECT_NAME}_node)
 target_link_libraries(
     ${PROJECT_NAME}_node
     PRIVATE
-      ${PROJECT_NAME}
+     ${CORE_LIB}
+     ${PROJECT_NAME}
+      
 )

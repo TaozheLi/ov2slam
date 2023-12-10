@@ -44,6 +44,24 @@ public:
     // Forward-Backward KLT Tracking
     void fbKltTracking(const std::vector<cv::Mat> &vprevpyr, const std::vector<cv::Mat> &vcurpyr, int nwinsize, int nbpyrlvl, float ferr, float fmax_fbklt_dist,
         std::vector<cv::Point2f> &vpts, std::vector<cv::Point2f> &vpriorkps, std::vector<bool> &vkpstatus) const;
+
+    void fbKltTrackingWithDepth(std::vector<double> kp_depth, const std::vector<cv::Mat> &vprevpyr, const std::vector<cv::Mat> &vcurpyr, int nwinsize, int nbpyrlvl, float ferr, float fmax_fbklt_dist,
+        std::vector<cv::Point2f> &vpts, std::vector<cv::Point2f> &vpriorkps, std::vector<bool> &vkpstatus);
+
+    double avg_double(const std::vector<double> &v);
+    double std_double(const std::vector<double> & v);
+    double  max_double(const std::vector<double> &v){
+	    double max = v[0];
+	    for(const auto &x:v){
+		if(x > max){
+		    max = x;
+		}
+	    }
+    return max;
+    }
+    std::vector<int> classifyBasedOnDepth(const int & classes, std::vector<double> featureDepth);
+    void RemovePointsThroughDepth(const int & classes, const std::vector<int> & groups, const std::vector<cv::Point2f> &prevFeatures,
+                                                          const std::vector<cv::Point2f> &currentFeatures, const double &a, const double & b, std::vector<bool> &status);
     
     void getLineMinSAD(const cv::Mat &iml, const cv::Mat &imr, const cv::Point2f &pt, const int nwinsize, float &xprior, float &l1err, bool bgoleft) const;
 

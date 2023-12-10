@@ -101,7 +101,7 @@ nfast_th: 10
 dmaxquality: 0.001 # used for gftt or singlescale
 
 # Pre-processing
-use_clahe: 1
+use_clahe: 0
 fclahe_val: 2
 
 # KLT related settings.
@@ -153,4 +153,4 @@ nmin_covscore: 25 # Min co-obs for optimizing in SLAM mode BA
 fkf_filtering_ratio: 0.95
 
 # Final Pass
-do_full_ba: 0
+do_full_ba: 1

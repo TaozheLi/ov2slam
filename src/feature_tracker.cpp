@@ -136,6 +136,191 @@ void FeatureTracker::fbKltTracking(const std::vector<cv::Mat> &vprevpyr, const s
     // std::cout << "\n \t >>> Backward kltTracking : #" << nbgood << " out of #" << vkpsidx.size() << " \n";
 }
 
+double FeatureTracker::avg_double(const std::vector<double> &v){
+    double sum;
+    sum = std::accumulate(v.begin(), v.end(), 0.0);
+    return sum / double(v.size());
+}
+
+double FeatureTracker::std_double(const std::vector<double> & v){
+    double mean = avg_double(v);
+    double sum = 0;
+    for(const auto & x: v){
+        sum += (x - mean) * (x- mean);
+    }
+    return sqrt(sum) / double(v.size());
+}
+
+std::vector<int> FeatureTracker::classifyBasedOnDepth(const int & classes, std::vector<double> featureDepth){
+    double max_depth = max_double(featureDepth);
+    double segment = (max_depth + 1.0) / double(classes);
+    std::vector<int> groups;
+    for(int i=0; i<featureDepth.size(); ++i){
+        //
+        double depth = featureDepth[i];
+        int group;
+        for(int s = 0; s<classes; ++s){
+            if(depth > (s + 1) * segment) continue;
+            if(depth > s * segment) group = s;
+        }
+        groups.push_back(group);
+    }
+    return groups;
+}
+
+void FeatureTracker::RemovePointsThroughDepth(const int & classes, const std::vector<int> & groups, const std::vector<cv::Point2f> &prevFeatures,
+                                                          const std::vector<cv::Point2f> &currentFeatures, const double &a, const double & b, std::vector<bool> &status){
+    assert(prevFeatures.size() == currentFeatures.size());
+    std::vector<std::pair<double, double>> AvgAndStdArray;
+    std::vector<double> Lengths;
+    std::vector<std::vector<double>> LengthOfEachGroups(classes);
+    for(int i=0; i<prevFeatures.size(); ++i){
+        int group = groups[i];
+        double length = std::pow((currentFeatures[i].x - prevFeatures[i].x) * (currentFeatures[i].x - prevFeatures[i].x) +
+                                 (currentFeatures[i].y - prevFeatures[i].y) * (currentFeatures[i].y - prevFeatures[i].y), 0.5);
+        LengthOfEachGroups[group].push_back(length);
+        Lengths.push_back(length);
+    }
+    for(int i=0; i<classes; ++i){
+        std::pair<double, double> _;
+        if(LengthOfEachGroups[i].size() != 0) {
+            _.first = avg_double(LengthOfEachGroups[i]);
+            _.second = std_double(LengthOfEachGroups[i]);
+        }
+        else{
+            _.first = 0;
+            _.second = 0;
+        }
+        AvgAndStdArray.push_back(_);
+    }
+//    for(int i=0; i<classes; ++i){
+//        std::cout<<"group :"<<i<<" avg :"<<AvgAndStdArray[i].first<<" std: "<<AvgAndStdArray[i].second<<std::endl;
+//    }
+    for(int i=0; i<prevFeatures.size(); ++i){
+        int group = groups[i];
+        double avg = AvgAndStdArray[group].first;
+        double std = AvgAndStdArray[group].second;
+        double length = Lengths[i];
+        if(length < (avg - a*std) || length > (avg + b * std)){
+            status[i] = false;
+        }
+    }
+
+}
+
+void FeatureTracker::fbKltTrackingWithDepth(std::vector<double> kp_depth, const std::vector<cv::Mat> &vprevpyr, const std::vector<cv::Mat> &vcurpyr, 
+        int nwinsize, int nbpyrlvl, float ferr, float fmax_fbklt_dist, std::vector<cv::Point2f> &vkps, 
+        std::vector<cv::Point2f> &vpriorkps, std::vector<bool> &vkpstatus)
+{
+    // std::cout << "\n \t >>> Forward-Backward kltTracking with Pyr of Images and Motion Prior! \n";
+
+    assert(vprevpyr.size() == vcurpyr.size());
+
+    if( vkps.empty() ) {
+        // std::cout << "\n \t >>> No kps were provided to kltTracking()!\n";
+        return;
+    }
+
+    cv::Size klt_win_size(nwinsize, nwinsize);
+
+    if( (int)vprevpyr.size() < 2*(nbpyrlvl+1) ) {
+        nbpyrlvl = vprevpyr.size() / 2 - 1;
+    }
+
+    // Objects for OpenCV KLT
+    size_t nbkps = vkps.size();
+    vkpstatus.reserve(nbkps);
+
+    std::vector<uchar> vstatus;
+    std::vector<float> verr;
+    std::vector<int> vkpsidx;
+    vstatus.reserve(nbkps);
+    verr.reserve(nbkps);
+    vkpsidx.reserve(nbkps);
+
+    // Tracking Forward
+    cv::calcOpticalFlowPyrLK(vprevpyr, vcurpyr, vkps, vpriorkps, 
+                vstatus, verr, klt_win_size,  nbpyrlvl, klt_convg_crit_, 
+                (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS) 
+                );
+
+    std::vector<cv::Point2f> vnewkps;
+    std::vector<cv::Point2f> vbackkps;
+    vnewkps.reserve(nbkps);
+    vbackkps.reserve(nbkps);
+
+    size_t nbgood = 0;
+
+    // Init outliers vector & update tracked kps
+    for( size_t i = 0 ; i < nbkps ; i++ ) 
+    {
+        if( !vstatus.at(i) ) {
+            vkpstatus.push_back(false);
+            continue;
+        }
+
+        if( verr.at(i) > ferr ) {
+            vkpstatus.push_back(false);
+            continue;
+        }
+
+        if( !inBorder(vpriorkps.at(i), vcurpyr.at(0)) ) {
+            vkpstatus.push_back(false);
+            continue;
+        }
+
+        vnewkps.push_back(vpriorkps.at(i));
+        vbackkps.push_back(vkps.at(i));
+        vkpstatus.push_back(true);
+        vkpsidx.push_back(i);
+        nbgood++;
+    }  
+    
+    if( vnewkps.empty() ) {
+        return;
+    }
+    // taozhe li part
+    std::vector<int> groups;
+    int classes = 20;
+    double a = 1.5;
+    double b = 1.5;
+    groups = classifyBasedOnDepth(classes, kp_depth);
+    RemovePointsThroughDepth(classes, groups, vnewkps, vbackkps, a, b, vkpstatus);
+    
+    vstatus.clear();
+    verr.clear();
+
+    // std::cout << "\n \t >>> Forward kltTracking : #" << nbgood << " out of #" << nbkps << " \n";
+
+    // Tracking Backward
+    cv::calcOpticalFlowPyrLK(vcurpyr, vprevpyr, vnewkps, vbackkps, 
+                vstatus, verr, klt_win_size,  0, klt_convg_crit_,
+                (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS) 
+                );
+    
+    nbgood = 0;
+    for( int i = 0, iend=vnewkps.size() ; i < iend ; i++ )
+    {
+        int idx = vkpsidx.at(i);
+
+        if( !vstatus.at(i) ) {
+            vkpstatus.at(idx) = false;
+            continue;
+        }
+
+        if( cv::norm(vkps.at(idx) - vbackkps.at(i)) > fmax_fbklt_dist ) {
+            vkpstatus.at(idx) = false;
+            continue;
+        }
+
+        nbgood++;
+    }
+    // classify feature points through its depth
+    
+
+    // std::cout << "\n \t >>> Backward kltTracking : #" << nbgood << " out of #" << vkpsidx.size() << " \n";
+}
+
 
 void FeatureTracker::getLineMinSAD(const cv::Mat &iml, const cv::Mat &imr, 
     const cv::Point2f &pt,  const int nwinsize, float &xprior, 

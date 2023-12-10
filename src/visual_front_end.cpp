@@ -154,8 +154,9 @@ void VisualFrontEnd::kltTracking()
     vpriors.reserve(pcurframe_->nbkps_);
 
     vkpis3d.reserve(pcurframe_->nbkps_);
-
-
+    
+    // store depth
+    std::vector<double> kp3d_depth;
     // Front-End is thread-safe so we can direclty access curframe's kps
     for( const auto &it : pcurframe_->mapkps_ ) 
     {
@@ -167,10 +168,13 @@ void VisualFrontEnd::kltTracking()
             if( kp.is3d_ ) 
             {
                 cv::Point2f projpx = pcurframe_->projWorldToImageDist(pmap_->map_plms_.at(kp.lmid_)->getPoint());
-
+                
+                
                 // Add prior if projected into image
                 if( pcurframe_->isInImage(projpx) ) 
                 {
+                    // put depth into it
+                    kp3d_depth.push_back(((pmap_->map_plms_.at(kp.lmid_))->getPoint())[2]);
                     v3dkps.push_back(kp.px_);
                     v3dpriors.push_back(projpx);
                     v3dkpids.push_back(kp.lmid_);
@@ -197,7 +201,8 @@ void VisualFrontEnd::kltTracking()
 
         auto vprior = v3dpriors;
 
-        ptracker_->fbKltTracking(
+        ptracker_->fbKltTrackingWithDepth(
+                    kp3d_depth,
                     prev_pyr_, 
                     cur_pyr_, 
                     pslamstate_->nklt_win_size_, 
@@ -311,7 +316,7 @@ void VisualFrontEnd::kltTrackingFromKF()
     std::vector<int> vbadids;
     vbadids.reserve(pcurframe_->nbkps_ * 0.2);
 
-
+     std::vector<double> kp3d_depth;
     // Front-End is thread-safe so we can direclty access curframe's kps
     for( const auto &it : pcurframe_->mapkps_ ) 
     {
@@ -336,7 +341,8 @@ void VisualFrontEnd::kltTrackingFromKF()
                     v3dkps.push_back(kfkpit->second.px_);
                     v3dpriors.push_back(projpx);
                     v3dkpids.push_back(kp.lmid_);
-
+                    Eigen::Vector3d s = (pmap_->map_plms_.at(kp.lmid_))->getPoint();
+                    kp3d_depth.push_back(((pmap_->map_plms_.at(kp.lmid_))->getPoint())[2]);
                     vkpis3d.push_back(true);
                     continue;
                 }
@@ -364,7 +370,8 @@ void VisualFrontEnd::kltTrackingFromKF()
 
         auto vprior = v3dpriors;
 
-        ptracker_->fbKltTracking(
+        ptracker_->fbKltTrackingWithDepth(
+                    kp3d_depth,
                     kf_pyr_, 
                     cur_pyr_, 
                     pslamstate_->nklt_win_size_, 
@@ -1218,3 +1225,4 @@ void VisualFrontEnd::reset()
     prev_pyr_.clear();
     kf_pyr_.clear();
 }
+
