@@ -124,7 +124,8 @@ void SlamManager::run()
     double time = -1.; // Current image timestamp
     double cam_delay = -1.; // Delay between two successive images
     double last_img_time = -1.; // Last received image time
-
+    double _times = 0.0;
+    double totalFeaturePoints =0.0;
     // Main SLAM loop
     while( !bexit_required_ ) {
 
@@ -134,8 +135,9 @@ void SlamManager::run()
         {
             // Update current frame
             frame_id_++;
+            _times += 1;
             pcurframe_->updateFrame(frame_id_, time);
-            std::cout<<"updating frame successfully"<<std::endl;
+            // std::cout<<"updating frame successfully"<<std::endl;
             // Update cam delay for automatic exit
             if( frame_id_ > 0 ) {
                 cam_delay = ros::Time::now().toSec() - last_img_time;
@@ -152,6 +154,8 @@ void SlamManager::run()
             if( pslamstate_->debug_ )
                 std::cout << "\n \t >>> [SLAM Node] New image send to Front-End\n";
             bool is_kf_req = pvisualfrontend_->visualTracking(img_left, time);
+            // std::cout<<"feature point nums: "<<pvisualfrontend_->_averageFeaturePointNums<<std::endl;
+            totalFeaturePoints += pvisualfrontend_->_averageFeaturePointNums;
             // Save current pose
             Logger::addSE3Pose(time, pcurframe_->getTwc(), is_kf_req);
 
@@ -227,7 +231,7 @@ void SlamManager::run()
             }
         }
     }
-
+    std::cout<<"average process feature points: "<<totalFeaturePoints / _times<<std::endl;
     std::cout << "\nOV²SLAM is stopping!\n";
 
     bis_on_ = false;

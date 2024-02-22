@@ -140,4 +140,11 @@ public:
     MotionModel motion_model_;
 
     bool bp3preq_ = false; 
+
+    //added by Taozhe Li
+    double getNumberGoodFeature(){
+        return _averageFeaturePointNums;
+    }
+    double _averageFeaturePointNums;
+    double _times;
 };
